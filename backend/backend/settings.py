@@ -16,6 +16,17 @@ DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
+USERNAME_MAX_LEN = 150
+EMAIL_MAX_LEN = 254
+FIRST_NAME_MAX_LEN = 150
+SECOND_NAME_MAX_LEN = 150
+TAG_NAME_MAX_LEN = 200
+TAG_SLUG_MAX_LEN = 200
+INGREDIENT_NAME_MAX_LEN = 200
+MEAS_UNIT_NAME_MAX_LEN = 200
+RECIPE_NAME_MAX_LEN = 200
+
+
 AUTH_USER_MODEL = 'users.MyUser'
 
 # Application definition
@@ -28,14 +39,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'repices',
-    'users',
+    'rest_framework.authtoken',
+    'django_filters',
+    'corsheaders',
     'debug_toolbar',
+    'djoser',
+    'recipes',
+    'users',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -142,7 +158,25 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
 
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 6,
+    'SEARCH_PARAM': 'name',
+}
 
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000'
+]
+
+DJOSER = {
+    'HIDE_USERS': False,
+    'SERIALIZERS': {
+        'user': 'users.serializers.CustomUserSerializer',
+        'current_user': 'users.serializers.CustomUserSerializer',
+        'user_create': 'users.serializers.CustomUserCreateSerializer',
+    },
+    'PERMISSIONS': {
+        'user_list': ['rest_framework.permissions.AllowAny'],
+        'user': ['rest_framework.permissions.AllowAny'],
+    }
 }
