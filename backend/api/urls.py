@@ -2,9 +2,14 @@ from django.urls import include, path
 from djoser import views as dj_views
 from rest_framework import routers
 
-import users.views as views
+import api.views as views
 
 router_v1 = routers.DefaultRouter()
+router_v1.register('tags', views.TagViewSet, basename='tags')
+router_v1.register('ingredients',
+                   views.IngredientViewSet,
+                   basename='ingredients')
+router_v1.register('recipes', views.RecipeViewSet, basename='recipes')
 router_v1.register('users', views.CustomUserViewSet, basename='users')
 
 urlpatterns = [

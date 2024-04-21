@@ -26,7 +26,6 @@ INGREDIENT_NAME_MAX_LEN = 200
 MEAS_UNIT_NAME_MAX_LEN = 200
 RECIPE_NAME_MAX_LEN = 200
 
-
 AUTH_USER_MODEL = 'users.MyUser'
 
 # Application definition
@@ -46,6 +45,7 @@ INSTALLED_APPS = [
     'djoser',
     'recipes',
     'users',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -126,7 +126,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
@@ -160,7 +160,8 @@ REST_FRAMEWORK = {
 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 6,
-    'SEARCH_PARAM': 'name',
+    # 'SEARCH_PARAM': 'name',
+    'NON_FIELD_ERRORS_KEY': 'errors',
 }
 
 
@@ -171,9 +172,9 @@ CORS_ORIGIN_WHITELIST = [
 DJOSER = {
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        'user': 'users.serializers.CustomUserSerializer',
-        'current_user': 'users.serializers.CustomUserSerializer',
-        'user_create': 'users.serializers.CustomUserCreateSerializer',
+        'user': 'api.serializers.CustomUserSerializer',
+        'current_user': 'api.serializers.CustomUserSerializer',
+        'user_create': 'api.serializers.CustomUserCreateSerializer',
     },
     'PERMISSIONS': {
         'user_list': ['rest_framework.permissions.AllowAny'],
