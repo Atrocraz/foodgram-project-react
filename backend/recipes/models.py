@@ -58,7 +58,10 @@ class Recipe(models.Model):
                                related_name='recipes',
                                verbose_name='Автор')
     name = models.CharField(max_length=settings.RECIPE_NAME_MAX_LEN)
-    image = models.TextField(verbose_name='Изображение блюда')
+    image = models.ImageField(
+        "Ссылка на изображение",
+        upload_to="recipes/images/"
+    )
     text = models.TextField(verbose_name='Текстовое описание')
     ingredients = models.ManyToManyField(Ingredient,
                                          through='RecipeIngredient',
@@ -68,6 +71,10 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(Tag, related_name='recipes')
     cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления')
+    pub_date = models.DateTimeField(
+        'Дата публикации',
+        auto_now_add=True
+    )
 
     class Meta:
         """Meta class for Recipe model."""
@@ -85,7 +92,8 @@ class RecipeIngredient(models.Model):
                                    related_name='ingredients')
     recipe = models.ForeignKey(Recipe,
                                on_delete=models.CASCADE,
-                               related_name='recipes')
+                               related_name='recipes',
+                               verbose_name='Рецепт')
     amount = models.PositiveIntegerField(verbose_name='Количество')
 
     class Meta:
@@ -96,3 +104,46 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f'{self.ingredient} {self.recipe}'
+
+
+class UserRecipeModelMixin(models.Model):
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             verbose_name='Пользователь')
+    recipe = models.ForeignKey(Recipe,
+                               on_delete=models.CASCADE,
+                               null=True,
+                               default=None)
+
+    class Meta:
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'recipe'), name='unique_user_recipe_list'
+            )
+        ]
+        abstract = True
+
+
+class ShoppingCart(UserRecipeModelMixin):
+
+    class Meta:
+
+        default_related_name = 'shopping'
+        verbose_name = 'Рецепт в списке покупок'
+        verbose_name_plural = 'Рецепты в списке покупок'
+
+    def __str__(self):
+        return f'Список покупок пользователя {self.user.username}'
+
+
+class Favourites(UserRecipeModelMixin):
+
+    class Meta:
+
+        default_related_name = 'favourites'
+        verbose_name = 'Рецепт в избранном'
+        verbose_name_plural = 'Рецепты в избранном'
+
+    def __str__(self):
+        return f'Избранный рецепт "{self.recipe}" у {self.user.username}'

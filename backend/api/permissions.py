@@ -1,7 +1,7 @@
 from rest_framework.permissions import BasePermission
 
 
-class AdvancedPermission(BasePermission):
+class IsAuthorOrReadOnly(BasePermission):
 
     def has_permission(self, request, view):
         if view.action in ['create', 'update', 'partial_update', 'destroy']:
