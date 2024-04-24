@@ -1,7 +1,9 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 
+from recipes.models import Recipe
 from users.models import Follow
 
 User = get_user_model()
@@ -29,6 +31,12 @@ class PostDeleteDBMixin():
         data.update(attrs)
 
         if request.method == "POST":
+            if 'recipe' in attrs:
+                if not Recipe.objects.filter(pk=attrs['recipe']).exists():
+                    return Response(
+                        {"errors": f'Рецепт с id {attrs["recipe"]} не существует'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
             serializer = serializer_cls(
                 data=data,
                 context={'request': request, })
@@ -36,9 +44,12 @@ class PostDeleteDBMixin():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         elif request.method == "DELETE":
-            subscription = model.objects.filter(**data)
-            if subscription.exists():
-                subscription.delete()
+            if 'recipe' in attrs:
+                get_object_or_404(Recipe, pk=attrs['recipe'])
+
+            instance = model.objects.filter(**data)
+            if instance.exists():
+                instance.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
 
             return Response(

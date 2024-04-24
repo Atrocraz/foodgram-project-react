@@ -12,6 +12,7 @@ from rest_framework.response import Response
 
 from .filters import IngredientFilter, RecipesFilter
 from .mixins import PostDeleteDBMixin
+from .pagination import PageAndLimitPagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (CustomAuthSerializer, FavouritesSerializer,
                           IngredientSerializer, ReadFollowSerializer,
@@ -79,7 +80,6 @@ class CustomUserViewSet(UserViewSet, PostDeleteDBMixin):
 
 
 class TagViewSet(
-        mixins.CreateModelMixin,  # не забыть убрать
         mixins.RetrieveModelMixin,
         mixins.ListModelMixin,
         viewsets.GenericViewSet):
@@ -108,6 +108,7 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipesFilter
     permission_classes = [IsAuthorOrReadOnly]
+    pagination_class = PageAndLimitPagination
 
     def get_queryset(self):
         queryset = Recipe.objects.select_related(
@@ -148,8 +149,6 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,
             detail=True,
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
-        get_object_or_404(Recipe, pk=pk)
-
         data = {'recipe': pk, }
         return self.process_request(request, Favourites,
                                     FavouritesSerializer,
@@ -159,8 +158,6 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,
             detail=True,
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        get_object_or_404(Recipe, pk=pk)
-
         data = {'recipe': pk, }
         return self.process_request(request, ShoppingCart,
                                     ShoppingCartSerializer,
