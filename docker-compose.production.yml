@@ -24,7 +24,7 @@ services:
     image: atrocraz/infra_backend-1
     env_file: .env
     volumes:
-      - static:/static_backend/
+      - static:/backend_static
       - media:/app/media/
       - redoc:/app/docs/
   
