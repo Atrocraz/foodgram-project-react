@@ -1,8 +1,7 @@
+import api.views as views
 from django.urls import include, path
 from djoser import views as dj_views
 from rest_framework import routers
-
-import api.views as views
 
 router_v1 = routers.DefaultRouter()
 router_v1.register('tags', views.TagViewSet, basename='tags')

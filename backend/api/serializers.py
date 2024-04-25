@@ -3,13 +3,13 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
-
-from .mixins import SubSerializerMixin
 from recipes.models import (Favourites, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
+from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 from users.models import Follow
+
+from .mixins import SubSerializerMixin
 
 User = get_user_model()
 

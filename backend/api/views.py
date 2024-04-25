@@ -2,14 +2,17 @@ from django.contrib.auth import get_user_model
 from django.db.models import Exists, OuterRef, Sum
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
-from djoser.views import UserViewSet
 from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
+from recipes.models import (Favourites, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 from rest_framework import mixins, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from users.models import Follow
 
 from .filters import IngredientFilter, RecipesFilter
 from .mixins import PostDeleteDBMixin
@@ -20,9 +23,6 @@ from .serializers import (CustomAuthSerializer, FavouritesSerializer,
                           ReadRecipeSerializer, ShoppingCartSerializer,
                           TagSerializer, WriteFollowSerializer,
                           WriteRecipeSerializer)
-from recipes.models import (Favourites, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
-from users.models import Follow
 
 User = get_user_model()
 

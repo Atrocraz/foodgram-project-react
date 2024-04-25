@@ -26,9 +26,8 @@ class MyUser(AbstractUser):
         help_text=(f'Обязательное. {settings.USERNAME_MAX_LEN} знаков или '
                    f'менее. Допустимы буквы, цифры и @/./+/-/_.'),
         validators=(RegexValidator(
-                        regex=r'^[\w.@+-]+\Z',
-                        message='Использованы запрещённые символы!'),
-                    check_me_name),
+            regex=r'^[\w.@+-]+\Z',
+            message='Использованы запрещённые символы!'), check_me_name),
     )
     first_name = models.CharField('Имя',
                                   max_length=settings.FIRST_NAME_MAX_LEN,
