@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Sum
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from django_filters.rest_framework import DjangoFilterBackend
@@ -19,13 +20,16 @@ from .serializers import (CustomAuthSerializer, FavouritesSerializer,
                           ReadRecipeSerializer, ShoppingCartSerializer,
                           TagSerializer, WriteFollowSerializer,
                           WriteRecipeSerializer)
-from recipes.models import Favourites, Ingredient, Recipe, ShoppingCart, Tag
+from recipes.models import (Favourites, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 from users.models import Follow
 
 User = get_user_model()
 
 
 class CustomAuthToken(ObtainAuthToken):
+    'Вьюсет для переопределения ответа на запрос токена.'
+
     serializer_class = CustomAuthSerializer
 
     def post(self, request, *args, **kwargs):
@@ -37,6 +41,11 @@ class CustomAuthToken(ObtainAuthToken):
 
 
 class CustomUserViewSet(UserViewSet, PostDeleteDBMixin):
+    '''Вьюсет для переопределения методов UserViewSet библиотеки Djoser.
+
+    Обрабатывает все эндпоинты модели пользователя, которые предоставляет
+    Djoser и эндпоинты модели Follow.
+    '''
 
     @action(["get", "put", "patch", "delete"],
             detail=False,
@@ -56,6 +65,8 @@ class CustomUserViewSet(UserViewSet, PostDeleteDBMixin):
             detail=True,
             permission_classes=[IsAuthenticated])
     def subscribe(self, request, id=None):
+        'Метод для обработки запросов создания и удаления подписки.'
+
         get_object_or_404(User.objects.all(), id=id)
         data = {'following': id, }
         return self.process_request(request, Follow, WriteFollowSerializer,
@@ -66,6 +77,8 @@ class CustomUserViewSet(UserViewSet, PostDeleteDBMixin):
             detail=False,
             permission_classes=[IsAuthenticated])
     def subscriptions(self, request, *args, **kwargs):
+        'Метод для обработки запроса списка действующих подписок.'
+
         user = request.user
         queryset = (
             User.objects
@@ -83,6 +96,8 @@ class TagViewSet(
         mixins.RetrieveModelMixin,
         mixins.ListModelMixin,
         viewsets.GenericViewSet):
+    'Вьюсет для обработки GET запросов к модели Tag.'
+
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = [AllowAny]
@@ -93,6 +108,8 @@ class IngredientViewSet(
         mixins.RetrieveModelMixin,
         mixins.ListModelMixin,
         viewsets.GenericViewSet):
+    'Вьюсет для обработки GET запросов к модели Ingredient.'
+
     queryset = Ingredient.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
@@ -105,12 +122,20 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,
                     mixins.RetrieveModelMixin, mixins.ListModelMixin,
                     mixins.DestroyModelMixin, viewsets.GenericViewSet,
                     PostDeleteDBMixin):
+    '''Вьюсет для обработки GET, POST, UPDATE и DELETE запросов
+    к модели Ingredient.'''
+
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipesFilter
     permission_classes = [IsAuthorOrReadOnly]
     pagination_class = PageAndLimitPagination
 
     def get_queryset(self):
+        '''Переопределение логики метода для аннотации полей.
+
+        Для авторизованных пользователей в сериализатор будут переданы
+        значения полей is_favorited и is_in_shopping_cart.'''
+
         queryset = Recipe.objects.select_related(
             'author'
         ).prefetch_related(
@@ -137,18 +162,25 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         )
 
     def get_serializer_class(self):
+        '''Переопределение метода для выбора сериализатора в зависимости от
+        типа запроса.'''
+
         if self.action in ['list', 'retrieve']:
             return ReadRecipeSerializer
         if self.action in ['create', 'delete', 'update', 'partial_update']:
             return WriteRecipeSerializer
 
     def perform_create(self, serializer):
+        'Переопределение метода для корректного сохранения автора записи'
+
         serializer.save(author=self.request.user, )
 
     @action(["post", "delete"],
             detail=True,
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
+        'Метод для обработки запросов создания и удаления избранного.'
+
         data = {'recipe': pk, }
         return self.process_request(request, Favourites,
                                     FavouritesSerializer,
@@ -158,8 +190,41 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,
             detail=True,
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
+        'Метод для обработки запросов добавления и удаления из списка покупок.'
+
         data = {'recipe': pk, }
         return self.process_request(request, ShoppingCart,
                                     ShoppingCartSerializer,
                                     "Рецепт не находится в списке покупок",
                                     data)
+
+    @action(
+        methods=["GET"],
+        detail=False,
+        permission_classes=[IsAuthenticated]
+    )
+    def download_shopping_cart(self, request):
+        'Метод для обработки запроса получения списка покупок в виде файла.'
+
+        ingredients = RecipeIngredient.objects.filter(
+            recipe__shopping__user=request.user
+        ).values_list(
+            'ingredient__name',
+            'ingredient__measurement_unit',
+        ).annotate(total=Sum('amount'))
+
+        shopping_result = []
+        for ingredient in ingredients:
+            shopping_result.append(
+                f'{ingredient[0]} - '
+                f'{ingredient[2]} '
+                f'({ingredient[1]})'
+            )
+        shopping_itog = '\n'.join(shopping_result)
+        response = FileResponse(
+            shopping_itog,
+            content_type='text/plain',
+            as_attachment=True,
+            filename='Список покупок.txt'
+        )
+        return response

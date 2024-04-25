@@ -10,8 +10,11 @@ User = get_user_model()
 
 
 class SubSerializerMixin():
+    'Миксин для сериализаторов, содержащих поле is_subscribed.'
 
     def get_is_subscribed(self, obj):
+        'Возвращает True, если автор запроса подписан на пользователя obj'
+
         request = self.context['request']
         if request is None or not request.user.is_authenticated:
             return False
@@ -22,10 +25,20 @@ class SubSerializerMixin():
 
 
 class PostDeleteDBMixin():
+    '''Миксин для обработки POST и DELETE запросов для моделей Follow,
+    Favourites и ShoppingCart.
+    '''
 
     @staticmethod
     def process_request(request, model=None, serializer_cls=None,
                         err_msg="", attrs=None):
+        '''Метод класса, отвечающий за обработку POST и DELETE запросов.
+
+        В качестве аргументов принимает: объект request, модель,
+        класс сериализатора, шаблон сообщения об ошибке и атрибуты для
+        сериализатора.
+        '''
+
         user = request.user
         data = {'user': user.id, }
         data.update(attrs)
@@ -34,7 +47,8 @@ class PostDeleteDBMixin():
             if 'recipe' in attrs:
                 if not Recipe.objects.filter(pk=attrs['recipe']).exists():
                     return Response(
-                        {"errors": f'Рецепт с id {attrs["recipe"]} не существует'},
+                        {"errors": (f'Рецепт с id {attrs["recipe"]} '
+                                    'не существует')},
                         status=status.HTTP_400_BAD_REQUEST)
 
             serializer = serializer_cls(

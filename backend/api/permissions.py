@@ -1,10 +1,18 @@
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class IsAuthorOrReadOnly(BasePermission):
+    '''Кастомный класс прав доступа.
+
+    Блокирует доступ к всем запросам, кроме SAFE_METHODS
+    для неавторизованных пользователей.
+
+    Блокирует доступ к изменению записи в базе данных для всех,
+    кроме автора записи.
+    '''
 
     def has_permission(self, request, view):
-        if view.action in ['create', 'update', 'partial_update', 'destroy']:
+        if view.action not in SAFE_METHODS:
             return request.user.is_authenticated
         else:
             return True

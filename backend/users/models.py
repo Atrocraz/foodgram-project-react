@@ -7,6 +7,11 @@ from .validators import check_me_name
 
 
 class MyUser(AbstractUser):
+    '''Кастомная модель пользователя.
+
+    Содержит дополнительные поля электронной почты, юзернейма, имени
+    и фамилии пользователя.'''
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
@@ -20,8 +25,9 @@ class MyUser(AbstractUser):
         max_length=settings.USERNAME_MAX_LEN,
         help_text=(f'Обязательное. {settings.USERNAME_MAX_LEN} знаков или '
                    f'менее. Допустимы буквы, цифры и @/./+/-/_.'),
-        validators=(RegexValidator(regex=r'^[\w.@+-]+\Z',
-                                   message='Forbidden symbol in username!'),
+        validators=(RegexValidator(
+                        regex=r'^[\w.@+-]+\Z',
+                        message='Использованы запрещённые символы!'),
                     check_me_name),
     )
     first_name = models.CharField('Имя',
@@ -33,16 +39,16 @@ class MyUser(AbstractUser):
 
     @property
     def is_admin(self):
+        'Метод для проверки наличия прав суперпользователя.'
         return self.is_superuser
 
 
 class Follow(models.Model):
-    """
-    Follow model class.
+    '''
+    Модель подписки.
 
-    Contains user and following fields.
-    """
-
+    Содержит поля пользователя и пользователя, на которого подписываются.
+    '''
     user = models.ForeignKey(MyUser,
                              on_delete=models.CASCADE,
                              verbose_name='Пользователь',
@@ -55,7 +61,7 @@ class Follow(models.Model):
                                   related_name='following')
 
     class Meta:
-        """Meta class for Follow model."""
+        'Класс Meta модели.'
 
         verbose_name = 'подписка'
         verbose_name_plural = 'Подписки'
@@ -65,5 +71,5 @@ class Follow(models.Model):
         ]
 
     def __str__(self):
-        """Magic method for Follow model."""
+        'Магический метод модели.'
         return f'Пользователь {self.user} подписан на {self.following}'

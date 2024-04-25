@@ -9,6 +9,10 @@ User = get_user_model()
 
 
 class Tag(models.Model):
+    '''Класс модели тэга.
+
+    Содержит поля названия, цвета и слага тэга.
+    '''
     name = models.CharField(max_length=settings.TAG_NAME_MAX_LEN,
                             verbose_name='Название',
                             blank=False)
@@ -24,17 +28,22 @@ class Tag(models.Model):
                                 message='Forbidden symbol in username!'), ))
 
     class Meta:
-        """Meta class for Tag model."""
+        'Класс Meta модели.'
 
         default_related_name = 'tags'
         verbose_name = 'тэг'
         verbose_name_plural = 'Тэги'
 
     def __str__(self):
+        'Магический метод модели.'
         return f'{self.name}'
 
 
 class Ingredient(models.Model):
+    '''Класс модели ингредиента.
+
+    Содержит поля названия и ед. измерения ингредиента.
+    '''
     name = models.CharField(max_length=settings.INGREDIENT_NAME_MAX_LEN,
                             verbose_name='Название')
 
@@ -43,7 +52,7 @@ class Ingredient(models.Model):
         verbose_name='Единица измерения')
 
     class Meta:
-        """Meta class for Ingredient model."""
+        'Класс Meta модели.'
 
         verbose_name = 'ингредиент'
         verbose_name_plural = 'Ингредиенты'
@@ -55,10 +64,16 @@ class Ingredient(models.Model):
         ]
 
     def __str__(self):
+        'Магический метод модели.'
         return f'{self.name} ({self.measurement_unit})'
 
 
 class Recipe(models.Model):
+    '''Класс модели рецепта.
+
+    Содержит поля автора, названия, изображения, текстовог описания,
+    ингредиентов, тэгов, времени приготовления и даты публикации.
+    '''
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
                                related_name='recipes',
@@ -83,16 +98,22 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        """Meta class for Recipe model."""
+        'Класс Meta модели.'
 
+        ordering = ('-pub_date',)
         verbose_name = 'рецепт'
         verbose_name_plural = 'Рецепты'
 
     def __str__(self):
+        'Магический метод модели.'
         return f'{self.name}'
 
 
 class RecipeIngredient(models.Model):
+    '''Класс промежуточной модели для моделей рецепта и ингредиента.
+
+    Содержит дополнительное поле количества ингредиента.
+    '''
     ingredient = models.ForeignKey(Ingredient,
                                    on_delete=models.CASCADE,
                                    related_name='ingredients')
@@ -103,16 +124,23 @@ class RecipeIngredient(models.Model):
     amount = models.PositiveIntegerField(verbose_name='Количество')
 
     class Meta:
-        """Meta class for Recipe model."""
+        'Класс Meta модели.'
 
         verbose_name = 'Ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецептах'
 
     def __str__(self):
+        'Магический метод модели.'
         return f'{self.ingredient} {self.recipe}'
 
 
 class UserRecipeModelMixin(models.Model):
+    '''Родительская абстрактная модель для списка покупок и
+    избранного.
+
+    Содержит поля пользоватя и рецепта ингредиента и валидацию
+    уникальности их сочетания.
+    '''
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              verbose_name='Пользователь')
@@ -122,6 +150,7 @@ class UserRecipeModelMixin(models.Model):
                                default=None)
 
     class Meta:
+        'Класс Meta модели.'
 
         constraints = [
             models.UniqueConstraint(
@@ -132,24 +161,29 @@ class UserRecipeModelMixin(models.Model):
 
 
 class ShoppingCart(UserRecipeModelMixin):
+    'Модель для списка покупок.'
 
     class Meta:
+        'Класс Meta модели.'
 
         default_related_name = 'shopping'
         verbose_name = 'Рецепт в списке покупок'
         verbose_name_plural = 'Рецепты в списке покупок'
 
     def __str__(self):
+        'Магический метод модели.'
         return f'Список покупок пользователя {self.user.username}'
 
 
 class Favourites(UserRecipeModelMixin):
 
     class Meta:
+        'Класс Meta модели.'
 
         default_related_name = 'favourites'
         verbose_name = 'Рецепт в избранном'
         verbose_name_plural = 'Рецепты в избранном'
 
     def __str__(self):
+        'Магический метод модели.'
         return f'Избранный рецепт "{self.recipe}" у {self.user.username}'
