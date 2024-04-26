@@ -55,7 +55,7 @@ class RecipesFilter(FilterSet):
     def filter_is_in_shopping_cart(self, queryset, name, value):
         '''Метод класса фильтра.
 
-        Предопределяет работу фильтрации по полю is_favorited'''
+        Предопределяет работу фильтрации по полю is_in_shopping_cart'''
 
         if value:
             return queryset.filter(

@@ -269,14 +269,15 @@ class WriteRecipeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         'Метод для валидации содержимого полей перед созданием рецепта.'
 
-        image = data.pop('image')
-        if not image and self.request.method != 'update':
+        if not 'image' in data and self.request.method != 'update':
+        # image = data.pop('image')
+        # if not image and self.request.method != 'update':
             raise serializers.ValidationError(
                 'Отсутствует фото'
             )
 
-        if image:
-            data['image'] = image
+        # if image:
+        #     data['image'] = image
 
         ingredients = data.get('ingredients')
         if not ingredients:
