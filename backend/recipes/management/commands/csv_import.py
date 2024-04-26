@@ -45,4 +45,4 @@ class Command(BaseCommand):
 
             model.objects.bulk_create([
                 model(**data) for data in data_list
-            ])
+            ], ignore_conflicts=True)

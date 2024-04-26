@@ -34,4 +34,4 @@ class Command(BaseCommand):
         if model is not None:
             model.objects.bulk_create([
                 model(**data) for data in data_list
-            ])
+            ], ignore_conflicts=True)
