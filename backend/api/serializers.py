@@ -271,7 +271,7 @@ class WriteRecipeSerializer(serializers.ModelSerializer):
 
         # image = data.pop('image')
         # if not image and self.request.method != 'update':
-        if 'image' not in data and self.request.method != 'update':
+        if 'image' not in data and self.context.request.method != 'update':
             raise serializers.ValidationError(
                 'Отсутствует фото'
             )
