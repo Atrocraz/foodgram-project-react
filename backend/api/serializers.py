@@ -269,9 +269,9 @@ class WriteRecipeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         'Метод для валидации содержимого полей перед созданием рецепта.'
 
-        if not 'image' in data and self.request.method != 'update':
         # image = data.pop('image')
         # if not image and self.request.method != 'update':
+        if 'image' not in data and self.request.method != 'update':
             raise serializers.ValidationError(
                 'Отсутствует фото'
             )
