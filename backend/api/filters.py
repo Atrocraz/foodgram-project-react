@@ -40,7 +40,7 @@ class RecipesFilter(FilterSet):
         'Класс Meta для фильтра'
 
         model = Recipe
-        fields = ["author", "tags"]
+        fields = ['is_favorited', 'author', 'tags', 'is_in_shopping_cart']
 
     def filter_is_favorited(self, queryset, name, value):
         '''Метод класса фильтра.

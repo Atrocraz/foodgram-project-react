@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.validators import RegexValidator
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 
 from .validators import check_hex_code
@@ -91,7 +91,8 @@ class Recipe(models.Model):
                                          verbose_name='Ингредиенты')
     tags = models.ManyToManyField(Tag, related_name='recipes')
     cooking_time = models.PositiveIntegerField(
-        verbose_name='Время приготовления')
+        verbose_name='Время приготовления',
+        validators=[MinValueValidator(1)])
     pub_date = models.DateTimeField(
         'Дата публикации',
         auto_now_add=True
