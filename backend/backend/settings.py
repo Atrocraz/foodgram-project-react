@@ -95,8 +95,7 @@ if os.getenv('USE_SQLITE', 'True').lower() == 'true':
 else:
     DATABASES = {
         'default': {
-            # 'ENGINE': 'django.db.backends.postgresql',
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('POSTGRES_DB', 'django'),
             'USER': os.getenv('POSTGRES_USER', 'django'),
             'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
