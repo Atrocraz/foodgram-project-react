@@ -46,15 +46,15 @@ class RecipeAdmin(admin.ModelAdmin):
         'pub_date',
         'cooking_time',
         'display_ingredients',
-        'favorite_count',
+        'favourites_count',
         'display_tags'
     )
-    search_fields = ('name', 'author__username', 'favorite_count')
+    search_fields = ('name', 'author__username', 'favourites_count')
     list_filter = ('name', 'author', 'tags')
 
     @admin.display(description='Добавили в избранное')
-    def favorite_count(self, obj):
-        return obj.favorite.count()
+    def favourites_count(self, obj):
+        return obj.favourites.count()
 
     @admin.display(description='Ингредиенты')
     def display_ingredients(self, recipe):
