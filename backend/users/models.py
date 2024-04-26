@@ -13,7 +13,7 @@ class MyUser(AbstractUser):
     и фамилии пользователя.'''
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'username']
 
     email = models.EmailField('Электронная почта',
                               max_length=settings.EMAIL_MAX_LEN,
