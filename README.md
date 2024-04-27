@@ -1,4 +1,4 @@
-
+[![Master Foodgram workflow](https://github.com/Atrocraz/foodgram-project-react/actions/workflows/master.yml/badge.svg)](https://github.com/Atrocraz/foodgram-project-react/actions/workflows/master.yml)
 # Дипломный проект, выполненный в рамках учебного курса Яндекс.Практикум
 
 ## О проекте
