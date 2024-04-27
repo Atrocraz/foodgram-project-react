@@ -352,7 +352,7 @@ class BaseFavouriteCartSerializer(serializers.ModelSerializer):
         fields = ('user', 'recipe')
 
     def validate(self, data):
-        if not Recipe.objects.filter(pk=data['recipe']).exists():
+        if not Recipe.objects.filter(pk=data['recipe'].id).exists():
             raise serializers.ValidationError(
                 {"errors": (f'Рецепт с id {data["recipe"]} '
                  'не существует')}
