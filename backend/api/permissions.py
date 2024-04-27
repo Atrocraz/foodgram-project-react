@@ -12,7 +12,7 @@ class IsAuthorOrReadOnly(BasePermission):
     '''
 
     def has_permission(self, request, view):
-        if view.action not in SAFE_METHODS:
+        if request.method not in SAFE_METHODS:
             return request.user.is_authenticated
         else:
             return True

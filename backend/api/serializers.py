@@ -269,15 +269,13 @@ class WriteRecipeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         'Метод для валидации содержимого полей перед созданием рецепта.'
 
-        # image = data.pop('image')
-        # if not image and self.request.method != 'update':
-        if 'image' not in data and self.context.request.method != 'update':
+        image = data.get('image')
+        if not image:
             raise serializers.ValidationError(
                 'Отсутствует фото'
             )
 
-        # if image:
-        #     data['image'] = image
+        data['image'] = image
 
         ingredients = data.get('ingredients')
         if not ingredients:
@@ -352,6 +350,14 @@ class BaseFavouriteCartSerializer(serializers.ModelSerializer):
 
         model = None
         fields = ('user', 'recipe')
+
+    def validate(self, data):
+        if not Recipe.objects.filter(pk=data['recipe']).exists():
+            raise serializers.ValidationError(
+                {"errors": (f'Рецепт с id {data["recipe"]} '
+                 'не существует')}
+            )
+        return data
 
     def to_representation(self, instance):
         'Метод для переопределения полей ответа на запрос.'

@@ -43,28 +43,22 @@ class PostDeleteDBMixin():
         data.update(attrs)
 
         if request.method == "POST":
-            if 'recipe' in attrs:
-                if not Recipe.objects.filter(pk=attrs['recipe']).exists():
-                    return Response(
-                        {"errors": (f'Рецепт с id {attrs["recipe"]} '
-                                    'не существует')},
-                        status=status.HTTP_400_BAD_REQUEST)
-
             serializer = serializer_cls(
                 data=data,
-                context={'request': request, })
+                context={'request': request,
+                         'err_msg': err_msg})
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            instance = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         elif request.method == "DELETE":
             if 'recipe' in attrs:
-                get_object_or_404(Recipe, pk=attrs['recipe'])
+                get_object_or_404(Recipe, pk=data['recipe'])
 
             instance = model.objects.filter(**data)
-            if instance.exists():
-                instance.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
+            if not instance.exists():
+                return Response(
+                    {"errors": err_msg},
+                    status=status.HTTP_400_BAD_REQUEST)
 
-            return Response(
-                {"errors": err_msg},
-                status=status.HTTP_400_BAD_REQUEST)
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
