@@ -1,9 +1,9 @@
 import csv
+from os.path import isfile
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from recipes.models import Ingredient, Tag
-from os.path import isfile
 
 
 class Command(BaseCommand):
@@ -28,7 +28,7 @@ class Command(BaseCommand):
             file_list = options['csv_file'].split(',')
 
             for file in file_list:
-                self.add_to_database(file+'.csv')
+                self.add_to_database(file + '.csv')
         else:
             self.add_to_database(options['csv_file'])
 
