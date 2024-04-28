@@ -44,7 +44,7 @@ class FoodgramUser(AbstractUser):
 
     def __str__(self):
         'Магический метод модели.'
-        return f'Пользователь {self.user}'
+        return f'Пользователь {self.username}'
 
 
 class Follow(models.Model):
