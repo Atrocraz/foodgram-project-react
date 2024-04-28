@@ -36,6 +36,12 @@ class FoodgramUser(AbstractUser):
                                  max_length=settings.SECOND_NAME_MAX_LEN,
                                  blank=False)
 
+    class Meta:
+        'Класс Meta модели.'
+
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'Пользователи'
+
     def __str__(self):
         'Магический метод модели.'
         return f'Пользователь {self.user}'
