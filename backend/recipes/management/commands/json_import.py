@@ -1,7 +1,9 @@
 import json
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from recipes.models import Ingredient, Tag
+from os.path import isfile
 
 
 class Command(BaseCommand):
@@ -13,25 +15,43 @@ class Command(BaseCommand):
 
     def __init__(self):
         self.models = {
-            'ingredients.csv': Ingredient,
-            'tags.csv': Tag,
+            'ingredients.json': Ingredient,
+            'tags.json': Tag,
         }
 
     def add_arguments(self, parser):
-        parser.add_argument('json_file', type=str)
+        parser.add_argument('json_file', type=str, nargs='?',
+                            default=settings.DEFAULT_IMPORT_LOCATIONS)
 
     def handle(self, *args, **options):
+        if options['json_file'] == settings.DEFAULT_IMPORT_LOCATIONS:
+            file_list = options['json_file'].split(',')
+
+            for file in file_list:
+                self.add_to_database(file+'.json')
+        else:
+            self.add_to_database(options['json_file'])
+
+    def add_to_database(self, file_path):
+        if not isfile(file_path):
+            print(f'Файл {file_path} не найден.')
+            return
+
         model = None
 
         for key, value in self.models.items():
-            if key in options['json_file']:
+            if key in file_path:
                 model = value
                 break
 
-        with open(options['json_file'], encoding='utf-8') as file:
-            data_list = json.load(file)
-
         if model is not None:
+            with open(file_path, encoding='utf-8') as file:
+                data_list = json.load(file)
+
             model.objects.bulk_create([
                 model(**data) for data in data_list
             ], ignore_conflicts=True)
+        if model == Ingredient:
+            print('Объекты добавлены в базу данных для модели Ингредиент.')
+        elif model == Tag:
+            print('Объекты добавлены в базу данных для модели Тег.')

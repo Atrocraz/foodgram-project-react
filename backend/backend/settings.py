@@ -27,7 +27,9 @@ INGREDIENT_NAME_MAX_LEN = 200
 MEAS_UNIT_NAME_MAX_LEN = 200
 RECIPE_NAME_MAX_LEN = 200
 
-AUTH_USER_MODEL = 'users.MyUser'
+DEFAULT_IMPORT_LOCATIONS = 'data/ingredients,data/tags'
+
+AUTH_USER_MODEL = 'users.FoodgramUser'
 
 # Application definition
 

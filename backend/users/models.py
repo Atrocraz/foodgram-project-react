@@ -6,7 +6,7 @@ from django.db import models
 from .validators import check_me_name
 
 
-class MyUser(AbstractUser):
+class FoodgramUser(AbstractUser):
     '''Кастомная модель пользователя.
 
     Содержит дополнительные поля электронной почты, юзернейма, имени
@@ -17,14 +17,13 @@ class MyUser(AbstractUser):
 
     email = models.EmailField('Электронная почта',
                               max_length=settings.EMAIL_MAX_LEN,
-                              unique=True,
-                              blank=False)
+                              unique=True)
     username = models.CharField(
         'Никнейм пользователя',
         unique=True,
         max_length=settings.USERNAME_MAX_LEN,
         help_text=(f'Обязательное. {settings.USERNAME_MAX_LEN} знаков или '
-                   f'менее. Допустимы буквы, цифры и @/./+/-/_.'),
+                   'менее. Допустимы буквы, цифры и @/./+/-/_.'),
         validators=(RegexValidator(
             regex=r'^[\w.@+-]+\Z',
             message='Использованы запрещённые символы!'), check_me_name),
@@ -37,10 +36,9 @@ class MyUser(AbstractUser):
                                  max_length=settings.SECOND_NAME_MAX_LEN,
                                  blank=False)
 
-    @property
-    def is_admin(self):
-        'Метод для проверки наличия прав суперпользователя.'
-        return self.is_superuser
+    def __str__(self):
+        'Магический метод модели.'
+        return f'Пользователь {self.user}'
 
 
 class Follow(models.Model):
@@ -49,11 +47,11 @@ class Follow(models.Model):
 
     Содержит поля пользователя и пользователя, на которого подписываются.
     '''
-    user = models.ForeignKey(MyUser,
+    user = models.ForeignKey(FoodgramUser,
                              on_delete=models.CASCADE,
                              verbose_name='Пользователь',
                              related_name='follows')
-    following = models.ForeignKey(MyUser,
+    following = models.ForeignKey(FoodgramUser,
                                   on_delete=models.SET_NULL,
                                   null=True,
                                   blank=True,

@@ -17,6 +17,7 @@ class RecipeIngredientInline(admin.TabularInline):
     '''Инлайн для отображения ингредиентов в рецептах.'''
 
     model = RecipeIngredient
+    min_num = 1
 
 
 @admin.register(Tag)
@@ -32,6 +33,7 @@ class TagInline(admin.TabularInline):
     '''Инлайн для отображения тегов в рецептах. '''
 
     model = Recipe.tags.through
+    min_num = 1
 
 
 @admin.register(Recipe)
@@ -75,7 +77,7 @@ class ShoppingCartAdmin(admin.ModelAdmin):
 
     list_display = ('user', 'recipe')
     list_filter = ('user', 'recipe')
-    search_fields = ('user',)
+    search_fields = ('user__username',)
 
 
 @admin.register(Favourites)
