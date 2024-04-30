@@ -1,43 +1,27 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from recipes.models import Recipe
 from rest_framework import status
 from rest_framework.response import Response
-from users.models import Follow
+
+from recipes.models import Recipe
 
 User = get_user_model()
 
 
-class SubSerializerMixin():
-    'Миксин для сериализаторов, содержащих поле is_subscribed.'
-
-    def get_is_subscribed(self, obj):
-        'Возвращает True, если автор запроса подписан на пользователя obj'
-
-        request = self.context['request']
-        if request is None or not request.user.is_authenticated:
-            return False
-
-        return Follow.objects.filter(
-            following=obj,
-            user=request.user).exists()
-
-
-class PostDeleteDBMixin():
-    '''Миксин для обработки POST и DELETE запросов для моделей Follow,
+class PostDeleteDBMixin:
+    """Миксин для обработки POST и DELETE запросов для моделей Follow,
     Favourites и ShoppingCart.
-    '''
+    """
 
     @staticmethod
     def process_request(request, model=None, serializer_cls=None,
                         err_msg="", attrs=None):
-        '''Метод класса, отвечающий за обработку POST и DELETE запросов.
+        """Метод класса, отвечающий за обработку POST и DELETE запросов.
 
         В качестве аргументов принимает: объект request, модель,
         класс сериализатора, шаблон сообщения об ошибке и атрибуты для
         сериализатора.
-        '''
-
+        """
         user = request.user
         data = {'user': user.id, }
         data.update(attrs)
@@ -50,15 +34,15 @@ class PostDeleteDBMixin():
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        elif request.method == "DELETE":
-            if 'recipe' in attrs:
-                get_object_or_404(Recipe, pk=data['recipe'])
 
-            instance = model.objects.filter(**data)
-            if not instance.exists():
-                return Response(
-                    {"errors": err_msg},
-                    status=status.HTTP_400_BAD_REQUEST)
+        if 'recipe' in attrs:
+            get_object_or_404(Recipe, pk=data['recipe'])
 
-            instance.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        instance = model.objects.filter(**data)
+        if not instance.exists():
+            return Response(
+                {"errors": err_msg},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -26,6 +26,9 @@ TAG_COLOR_MAX_LEN = 200
 INGREDIENT_NAME_MAX_LEN = 200
 MEAS_UNIT_NAME_MAX_LEN = 200
 RECIPE_NAME_MAX_LEN = 200
+RECIPE_INGREDIENT_MIN_AMOUNT = 1
+RECIPE_MIN_COOKING_TIME = 1
+PAGE_SIZE_QUERY_PARAM = 'limit'
 
 DEFAULT_IMPORT_LOCATIONS = 'data/ingredients,data/tags'
 
@@ -43,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    'colorfield',
     'corsheaders',
     'debug_toolbar',
     'djoser',
@@ -174,9 +178,9 @@ CORS_ORIGIN_WHITELIST = [
 DJOSER = {
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        'user': 'api.serializers.CustomUserSerializer',
-        'current_user': 'api.serializers.CustomUserSerializer',
-        'user_create': 'api.serializers.CustomUserCreateSerializer',
+        'user': 'api.serializers.FoodgramUserSerializer',
+        'current_user': 'api.serializers.FoodgramUserSerializer',
+        'user_create': 'api.serializers.FoodgramUserCreateSerializer',
     },
     'PERMISSIONS': {
         'user_list': ['rest_framework.permissions.AllowAny'],

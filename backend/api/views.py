@@ -4,31 +4,33 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (Favourites, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
-from rest_framework import mixins, viewsets
+from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+
+from api.filters import IngredientFilter, RecipesFilter
+from api.mixins import PostDeleteDBMixin
+from api.pagination import PageAndLimitPagination
+from api.permissions import IsAuthorOrReadOnly
+from api.serializers import (CustomAuthSerializer, FavouritesSerializer,
+                             IngredientSerializer, ReadFollowSerializer,
+                             ReadRecipeSerializer, ShoppingCartSerializer,
+                             TagSerializer, WriteFollowSerializer,
+                             WriteRecipeSerializer)
+from recipes.models import (Favourites, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 from users.models import Follow
 
-from .filters import IngredientFilter, RecipesFilter
-from .mixins import PostDeleteDBMixin
-from .pagination import PageAndLimitPagination
-from .permissions import IsAuthorOrReadOnly
-from .serializers import (CustomAuthSerializer, FavouritesSerializer,
-                          IngredientSerializer, ReadFollowSerializer,
-                          ReadRecipeSerializer, ShoppingCartSerializer,
-                          TagSerializer, WriteFollowSerializer,
-                          WriteRecipeSerializer)
 
 User = get_user_model()
 
 
 class CustomAuthToken(ObtainAuthToken):
-    'Вьюсет для переопределения ответа на запрос токена.'
+    """Вьюсет для переопределения ответа на запрос токена."""
 
     serializer_class = CustomAuthSerializer
 
@@ -41,11 +43,11 @@ class CustomAuthToken(ObtainAuthToken):
 
 
 class CustomUserViewSet(UserViewSet, PostDeleteDBMixin):
-    '''Вьюсет для переопределения методов UserViewSet библиотеки Djoser.
+    """Вьюсет для переопределения методов UserViewSet библиотеки Djoser.
 
     Обрабатывает все эндпоинты модели пользователя, которые предоставляет
     Djoser и эндпоинты модели Follow.
-    '''
+    """
 
     @action(["get", "put", "patch", "delete"],
             detail=False,
@@ -65,8 +67,7 @@ class CustomUserViewSet(UserViewSet, PostDeleteDBMixin):
             detail=True,
             permission_classes=[IsAuthenticated])
     def subscribe(self, request, id=None):
-        'Метод для обработки запросов создания и удаления подписки.'
-
+        """Метод для обработки запросов создания и удаления подписки."""
         get_object_or_404(User.objects.all(), id=id)
         data = {'following': id, }
         return self.process_request(request, Follow, WriteFollowSerializer,
@@ -77,8 +78,7 @@ class CustomUserViewSet(UserViewSet, PostDeleteDBMixin):
             detail=False,
             permission_classes=[IsAuthenticated])
     def subscriptions(self, request, *args, **kwargs):
-        'Метод для обработки запроса списка действующих подписок.'
-
+        """Метод для обработки запроса списка действующих подписок."""
         user = request.user
         queryset = (
             User.objects
@@ -92,11 +92,8 @@ class CustomUserViewSet(UserViewSet, PostDeleteDBMixin):
         return self.get_paginated_response(serializer.data)
 
 
-class TagViewSet(
-        mixins.RetrieveModelMixin,
-        mixins.ListModelMixin,
-        viewsets.GenericViewSet):
-    'Вьюсет для обработки GET запросов к модели Tag.'
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    """Вьюсет для обработки GET запросов к модели Tag."""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -104,11 +101,8 @@ class TagViewSet(
     pagination_class = None
 
 
-class IngredientViewSet(
-        mixins.RetrieveModelMixin,
-        mixins.ListModelMixin,
-        viewsets.GenericViewSet):
-    'Вьюсет для обработки GET запросов к модели Ingredient.'
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    """Вьюсет для обработки GET запросов к модели Ingredient."""
 
     queryset = Ingredient.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -118,24 +112,22 @@ class IngredientViewSet(
     pagination_class = None
 
 
-class RecipeViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,
-                    mixins.RetrieveModelMixin, mixins.ListModelMixin,
-                    mixins.DestroyModelMixin, viewsets.GenericViewSet,
-                    PostDeleteDBMixin):
-    '''Вьюсет для обработки GET, POST, UPDATE и DELETE запросов
-    к модели Ingredient.'''
+class RecipeViewSet(viewsets.ModelViewSet, PostDeleteDBMixin):
+    """Вьюсет для обработки GET, POST, UPDATE и DELETE запросов
+    к модели Ingredient.
+    """
 
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipesFilter
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     pagination_class = PageAndLimitPagination
 
     def get_queryset(self):
-        '''Переопределение логики метода для аннотации полей.
+        """Переопределение логики метода для аннотации полей.
 
         Для авторизованных пользователей в сериализатор будут переданы
-        значения полей is_favorited и is_in_shopping_cart.'''
-
+        значения полей is_favorited и is_in_shopping_cart.
+        """
         queryset = Recipe.objects.select_related(
             'author'
         ).prefetch_related(
@@ -162,25 +154,19 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         )
 
     def get_serializer_class(self):
-        '''Переопределение метода для выбора сериализатора в зависимости от
-        типа запроса.'''
-
+        """Переопределение метода для выбора сериализатора в зависимости от
+        типа запроса.
+        """
         if self.action in ['list', 'retrieve']:
             return ReadRecipeSerializer
-        if self.action in ['create', 'delete', 'update', 'partial_update']:
-            return WriteRecipeSerializer
 
-    def perform_create(self, serializer):
-        'Переопределение метода для корректного сохранения автора записи'
-
-        serializer.save(author=self.request.user, )
+        return WriteRecipeSerializer
 
     @action(["post", "delete"],
             detail=True,
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
-        'Метод для обработки запросов создания и удаления избранного.'
-
+        """Метод для обработки запросов создания и удаления избранного."""
         data = {'recipe': pk, }
         return self.process_request(request, Favourites,
                                     FavouritesSerializer,
@@ -190,8 +176,9 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,
             detail=True,
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        'Метод для обработки запросов добавления и удаления из списка покупок.'
-
+        """Метод для обработки запросов добавления и удаления
+        из списка покупок.
+        """
         data = {'recipe': pk, }
         return self.process_request(request, ShoppingCart,
                                     ShoppingCartSerializer,
@@ -204,15 +191,21 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,
         permission_classes=[IsAuthenticated]
     )
     def download_shopping_cart(self, request):
-        'Метод для обработки запроса получения списка покупок в виде файла.'
-
+        """Метод для обработки запроса получения списка покупок
+        в виде файла.
+        """
         ingredients = RecipeIngredient.objects.filter(
-            recipe__shopping__user=request.user
+            recipe__shopping_carts__user=request.user
         ).values_list(
             'ingredient__name',
             'ingredient__measurement_unit',
         ).annotate(total=Sum('amount'))
 
+        return self.return_file_in_responser(ingredients=ingredients)
+
+    @staticmethod
+    def return_file_in_responser(ingredients):
+        """Метод для формирования текстового списка ингредиентов."""
         shopping_result = []
         for ingredient in ingredients:
             shopping_result.append(

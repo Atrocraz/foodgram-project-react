@@ -3,14 +3,15 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 
-from .validators import check_me_name
+from users.validators import check_me_name
 
 
 class FoodgramUser(AbstractUser):
-    '''Кастомная модель пользователя.
+    """Модель пользователя.
 
     Содержит дополнительные поля электронной почты, юзернейма, имени
-    и фамилии пользователя.'''
+    и фамилии пользователя.
+    """
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'username']
@@ -37,22 +38,22 @@ class FoodgramUser(AbstractUser):
                                  blank=False)
 
     class Meta:
-        'Класс Meta модели.'
-
+        """Класс Meta модели."""
+        ordering = ('username',)
         verbose_name = 'пользователь'
         verbose_name_plural = 'Пользователи'
 
     def __str__(self):
-        'Магический метод модели.'
+        """Строковое представление модели."""
         return f'Пользователь {self.username}'
 
 
 class Follow(models.Model):
-    '''
-    Модель подписки.
+    """Модель подписки.
 
     Содержит поля пользователя и пользователя, на которого подписываются.
-    '''
+    """
+
     user = models.ForeignKey(FoodgramUser,
                              on_delete=models.CASCADE,
                              verbose_name='Пользователь',
@@ -65,8 +66,8 @@ class Follow(models.Model):
                                   related_name='following')
 
     class Meta:
-        'Класс Meta модели.'
-
+        """Класс Meta модели."""
+        ordering = ('user',)
         verbose_name = 'подписка'
         verbose_name_plural = 'Подписки'
         constraints = [
@@ -75,5 +76,5 @@ class Follow(models.Model):
         ]
 
     def __str__(self):
-        'Магический метод модели.'
+        """Строковое представление модели."""
         return f'Пользователь {self.user} подписан на {self.following}'

@@ -41,6 +41,8 @@
  7. В отдельном терминале выполнить команды:
     - `docker ps` - для отображения запущенных контейнеров
     - `docker exec -it container_id python manage.py migrate` - в качестве `container_id` должен быть указан айди контейнера бэкенда
+ 8. Импортировать данные для моделей ингредиента и тэга с помощью команды:
+    - `docker exec -it container_id python manage.py csv_import` - в качестве `container_id` должен быть указан айди контейнера бэкенда
 
 ## Как развернуть проект на сервере
  1. Клонировать проект с помощью команды `git clone`
@@ -78,6 +80,10 @@ USER                имя пользователя на сервере
 SSH_KEY             приватный ssh-ключ
 SSH_PASSPHRASE      пароль приватного ssh-ключа
 ```
+
+## Пример развёрнутого проекта
+С развёрнутым проектом можно ознакомиться по адресу https://yetanotherfoodgram.ddns.net/
+Документация API находится по адресу https://yetanotherfoodgram.ddns.net/api/docs/
 
 ## Автор(-ы)
 Владимир Минеев (https://github.com/Atrocraz)

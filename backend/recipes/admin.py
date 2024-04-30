@@ -1,12 +1,12 @@
 from django.contrib import admin
 
-from .models import (Favourites, Ingredient, Recipe, RecipeIngredient,
-                     ShoppingCart, Tag)
+from recipes.models import (Favourites, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    '''Модель для администрирования ингредиентов.'''
+    """Модель для администрирования ингредиентов."""
 
     list_display = ('name', 'measurement_unit')
     list_filter = ('name',)
@@ -14,7 +14,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 
 class RecipeIngredientInline(admin.TabularInline):
-    '''Инлайн для отображения ингредиентов в рецептах.'''
+    """Инлайн для отображения ингредиентов в рецептах."""
 
     model = RecipeIngredient
     min_num = 1
@@ -22,25 +22,18 @@ class RecipeIngredientInline(admin.TabularInline):
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    '''Модель для администрирования тегов.'''
+    """Модель для администрирования тегов."""
 
     list_display = ('name', 'color', 'slug')
     search_fields = ('name', 'color')
     list_filter = ('name', 'color')
 
 
-class TagInline(admin.TabularInline):
-    '''Инлайн для отображения тегов в рецептах. '''
-
-    model = Recipe.tags.through
-    min_num = 1
-
-
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    '''Модель для администрирования рецептов.'''
+    """Модель для администрирования рецептов."""
 
-    inlines = (RecipeIngredientInline, TagInline)
+    inlines = (RecipeIngredientInline, )
     list_display = (
         'name',
         'text',
@@ -56,16 +49,19 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='Добавили в избранное')
     def favourites_count(self, obj):
+        """Метод класса для получения числа подписок."""
         return obj.favourites.count()
 
     @admin.display(description='Ингредиенты')
     def display_ingredients(self, recipe):
+        """Метод класса для получения ингредиентов."""
         return recipe.ingredients.values_list(
             'name', flat=True
         ).order_by('name')
 
     @admin.display(description='Теги')
     def display_tags(self, recipe):
+        """Метод класса для получения тэгов."""
         return recipe.tags.values_list(
             'name', flat=True
         ).order_by('name')
@@ -73,7 +69,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    '''Модель для администрирования  списков покупок.'''
+    """Модель для администрирования списков покупок."""
 
     list_display = ('user', 'recipe')
     list_filter = ('user', 'recipe')
@@ -82,4 +78,4 @@ class ShoppingCartAdmin(admin.ModelAdmin):
 
 @admin.register(Favourites)
 class FavoriteAdmin(ShoppingCartAdmin):
-    '''Модель для администрирования избранного.'''
+    """Модель для администрирования избранного."""
