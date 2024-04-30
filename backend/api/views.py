@@ -25,7 +25,6 @@ from recipes.models import (Favourites, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from users.models import Follow
 
-
 User = get_user_model()
 
 

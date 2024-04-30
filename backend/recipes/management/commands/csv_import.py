@@ -3,15 +3,16 @@ from os.path import isfile
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
+
 from recipes.models import Ingredient, Tag
 
 
 class Command(BaseCommand):
-    '''Класс комманды Django для импорта данных в базу.
+    """Класс комманды Django для импорта данных в базу.
 
     Допускает импорт данных моделей Ingredient и Tag из
     файла формата csv.
-    '''
+    """
 
     def __init__(self):
         self.models = {
