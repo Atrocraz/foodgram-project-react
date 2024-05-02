@@ -16,7 +16,7 @@ from api.filters import IngredientFilter, RecipesFilter
 from api.mixins import PostDeleteDBMixin
 from api.pagination import PageAndLimitPagination
 from api.permissions import IsAuthorOrReadOnly
-from api.serializers import (FoodgramAuthSerializer, FavouritesSerializer,
+from api.serializers import (FavouritesSerializer, FoodgramAuthSerializer,
                              IngredientSerializer, ReadFollowSerializer,
                              ReadRecipeSerializer, ShoppingCartSerializer,
                              TagSerializer, WriteFollowSerializer,
