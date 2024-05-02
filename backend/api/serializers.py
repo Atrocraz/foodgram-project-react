@@ -19,6 +19,7 @@ class FoodgramUserCreateSerializer(UserCreateSerializer):
 
     class Meta:
         """Класс Meta сериализатора."""
+
         model = User
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
                   'password')
@@ -29,28 +30,29 @@ class FoodgramUserSerializer(UserSerializer):
 
     is_subscribed = serializers.SerializerMethodField()
 
-    def get_is_subscribed(self, obj):
-        """Возвращает True, если автор запроса подписан на пользователя obj."""
-        request = self.context['request']
-        return request is not None and request.user.is_authenticated and \
-            obj.following.filter(user=request.user).exists()
-
     class Meta:
         """Класс Meta сериализатора."""
+
         model = User
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
                   'is_subscribed')
+
+    def get_is_subscribed(self, obj):
+        """Возвращает True, если автор запроса подписан на пользователя obj."""
+        request = self.context['request']
+        return (request is not None and request.user.is_authenticated and
+                obj.following.filter(user=request.user).exists())
 
 
 class ReadFollowSerializer(FoodgramUserSerializer):
     """Класс-сериализатор для возврата ответа на запрос к модели Follow."""
 
-    is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.ReadOnlyField(source='recipes.count')
 
     class Meta:
         """Класс Meta сериализатора."""
+
         model = User
         fields = FoodgramUserSerializer.Meta.fields + ('recipes',
                                                        'recipes_count')
@@ -70,11 +72,9 @@ class ReadFollowSerializer(FoodgramUserSerializer):
 class WriteFollowSerializer(serializers.ModelSerializer):
     """Класс-сериализатор для записи в модель Follow."""
 
-    following = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all())
-
     class Meta:
         """Класс Meta сериализатора."""
+
         model = Follow
         fields = ('user', 'following')
         validators = [
@@ -100,10 +100,8 @@ class WriteFollowSerializer(serializers.ModelSerializer):
                                     context=self.context).data
 
 
-class CustomAuthSerializer(serializers.Serializer):
-    """Кастомный сериализатор для авторизации пользователя и
-    получения токена.
-    """
+class FoodgramAuthSerializer(serializers.Serializer):
+    """Cериализатор для авторизации пользователя и получения токена."""
 
     email = serializers.CharField(
         label=_("Email"),
@@ -144,6 +142,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Класс Meta сериализатора."""
+
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
 
@@ -153,6 +152,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Класс Meta сериализатора."""
+
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
 
@@ -167,13 +167,15 @@ class WriteIngredientRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Класс Meta сериализатора."""
+
         model = RecipeIngredient
         fields = ('id', 'amount')
 
 
 class GetIngredientRecipeSerializer(serializers.ModelSerializer):
-    """Класс-сериализатор для возврата ответа на запрос
-    к модели RecipeIngredient.
+    """Класс-сериализатор модели RecipeIngredient.
+
+    Обрабатывает данные для возврата ответа на запрос к модели.
     """
 
     id = serializers.PrimaryKeyRelatedField(source='ingredient',
@@ -187,6 +189,7 @@ class GetIngredientRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Класс Meta сериализатора."""
+
         model = RecipeIngredient
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
@@ -203,6 +206,7 @@ class WriteRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Класс Meta сериализатора."""
+
         model = Recipe
         fields = ('author', 'name', 'image', 'text', 'cooking_time',
                   'ingredients', 'tags')
@@ -294,6 +298,7 @@ class ReadRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Класс Meta сериализатора."""
+
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
                   'is_in_shopping_cart', 'name', 'image', 'text',
@@ -302,12 +307,15 @@ class ReadRecipeSerializer(serializers.ModelSerializer):
 
 
 class BaseFavouriteCartSerializer(serializers.ModelSerializer):
-    """Родительский класс сериализатора для сериализаторов моделей
-    Favourites и ShoppingCart.
+    """Родительский класс сериализатора.
+
+    Нужен в качестве миксина для сериализаторов моделейFavourites и
+    ShoppingCart.
     """
 
     class Meta:
         """Класс Meta сериализатора."""
+
         model = None
         fields = ('user', 'recipe')
 
@@ -331,6 +339,7 @@ class FavouritesSerializer(BaseFavouriteCartSerializer):
 
     class Meta:
         """Класс Meta сериализатора."""
+
         model = Favourites
         fields = BaseFavouriteCartSerializer.Meta.fields
         validators = [
@@ -346,6 +355,7 @@ class ShoppingCartSerializer(BaseFavouriteCartSerializer):
 
     class Meta:
         """Класс Meta сериализатора."""
+
         model = ShoppingCart
         fields = BaseFavouriteCartSerializer.Meta.fields
         validators = [
@@ -363,5 +373,6 @@ class UsersRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Класс Meta сериализатора."""
+
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')

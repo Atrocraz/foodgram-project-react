@@ -85,8 +85,8 @@ SSH_PASSPHRASE      пароль приватного ssh-ключа
 ```
 
 ## Пример развёрнутого проекта
-С развёрнутым проектом можно ознакомиться по адресу https://yetanotherfoodgram.ddns.net/
-Документация API находится по адресу https://yetanotherfoodgram.ddns.net/api/docs/
+С развёрнутым проектом можно ознакомиться по [ссылке](https://yetanotherfoodgram.ddns.net/)
+Документация API находится по [ссылке](https://yetanotherfoodgram.ddns.net/api/docs/)
 
 ## Автор(-ы)
 Владимир Минеев (https://github.com/Atrocraz)

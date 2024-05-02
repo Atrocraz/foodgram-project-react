@@ -16,7 +16,7 @@ from api.filters import IngredientFilter, RecipesFilter
 from api.mixins import PostDeleteDBMixin
 from api.pagination import PageAndLimitPagination
 from api.permissions import IsAuthorOrReadOnly
-from api.serializers import (CustomAuthSerializer, FavouritesSerializer,
+from api.serializers import (FoodgramAuthSerializer, FavouritesSerializer,
                              IngredientSerializer, ReadFollowSerializer,
                              ReadRecipeSerializer, ShoppingCartSerializer,
                              TagSerializer, WriteFollowSerializer,
@@ -28,10 +28,10 @@ from users.models import Follow
 User = get_user_model()
 
 
-class CustomAuthToken(ObtainAuthToken):
+class FoodgramAuthToken(ObtainAuthToken):
     """Вьюсет для переопределения ответа на запрос токена."""
 
-    serializer_class = CustomAuthSerializer
+    serializer_class = FoodgramAuthSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -41,7 +41,7 @@ class CustomAuthToken(ObtainAuthToken):
         return Response({'auth_token': token.key})
 
 
-class CustomUserViewSet(UserViewSet, PostDeleteDBMixin):
+class FoodgramUserViewSet(UserViewSet, PostDeleteDBMixin):
     """Вьюсет для переопределения методов UserViewSet библиотеки Djoser.
 
     Обрабатывает все эндпоинты модели пользователя, которые предоставляет
@@ -112,8 +112,9 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet, PostDeleteDBMixin):
-    """Вьюсет для обработки GET, POST, UPDATE и DELETE запросов
-    к модели Ingredient.
+    """Вьюсет для обработки запросовк модели Ingredient.
+
+    Обрабатывает GET, POST, UPDATE и DELETE запросы.
     """
 
     filter_backends = (DjangoFilterBackend,)
@@ -175,8 +176,9 @@ class RecipeViewSet(viewsets.ModelViewSet, PostDeleteDBMixin):
             detail=True,
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        """Метод для обработки запросов добавления и удаления
-        из списка покупок.
+        """Метод для обработки запросов к списку покупок.
+
+        Обрабатывает операции добавления и удаления.
         """
         data = {'recipe': pk, }
         return self.process_request(request, ShoppingCart,
@@ -190,9 +192,7 @@ class RecipeViewSet(viewsets.ModelViewSet, PostDeleteDBMixin):
         permission_classes=[IsAuthenticated]
     )
     def download_shopping_cart(self, request):
-        """Метод для обработки запроса получения списка покупок
-        в виде файла.
-        """
+        """Метод для обработки запроса получения списка покупок."""
         ingredients = RecipeIngredient.objects.filter(
             recipe__shopping_carts__user=request.user
         ).values_list(

@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
+from recipes.misc import get_rnd_hex_color
+
 User = get_user_model()
 
 
@@ -15,18 +17,18 @@ class Tag(models.Model):
 
     name = models.CharField(max_length=settings.TAG_NAME_MAX_LEN,
                             verbose_name='Название',
-                            blank=False,
                             unique=True)
     color = ColorField(unique=True,
                        max_length=settings.TAG_COLOR_MAX_LEN,
                        verbose_name='Цветовой код',
-                       default='#FF0000')
+                       default=get_rnd_hex_color)
     slug = models.SlugField(max_length=settings.TAG_SLUG_MAX_LEN,
                             unique=True,
                             verbose_name='Слаг')
 
     class Meta:
         """Класс Meta модели."""
+
         ordering = ('name',)
         verbose_name = 'тэг'
         verbose_name_plural = 'Тэги'
@@ -41,6 +43,7 @@ class Ingredient(models.Model):
 
     Содержит поля названия и ед. измерения ингредиента.
     """
+
     name = models.CharField(max_length=settings.INGREDIENT_NAME_MAX_LEN,
                             verbose_name='Название')
 
@@ -50,6 +53,7 @@ class Ingredient(models.Model):
 
     class Meta:
         """Класс Meta модели."""
+
         ordering = ('name',)
         verbose_name = 'ингредиент'
         verbose_name_plural = 'Ингредиенты'
@@ -71,6 +75,7 @@ class Recipe(models.Model):
     Содержит поля автора, названия, изображения, текстовог описания,
     ингредиентов, тэгов, времени приготовления и даты публикации.
     """
+
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
                                related_name='recipes',
@@ -98,6 +103,7 @@ class Recipe(models.Model):
 
     class Meta:
         """Класс Meta модели."""
+
         ordering = ('-pub_date',)
         verbose_name = 'рецепт'
         verbose_name_plural = 'Рецепты'
@@ -112,6 +118,7 @@ class RecipeIngredient(models.Model):
 
     Содержит дополнительное поле количества ингредиента.
     """
+
     ingredient = models.ForeignKey(Ingredient,
                                    on_delete=models.CASCADE,
                                    related_name='recipe_ingredients')
@@ -123,6 +130,7 @@ class RecipeIngredient(models.Model):
 
     class Meta:
         """Класс Meta модели."""
+
         ordering = ('recipe',)
         verbose_name = 'Ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецептах'
@@ -139,6 +147,7 @@ class UserRecipeModelMixin(models.Model):
     Содержит поля пользоватя и рецепта ингредиента и валидацию
     уникальности их сочетания.
     """
+
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              verbose_name='Пользователь')
@@ -149,15 +158,17 @@ class UserRecipeModelMixin(models.Model):
 
     class Meta:
         """Класс Meta модели."""
+
         abstract = True
+        ordering = ('user',)
 
 
 class ShoppingCart(UserRecipeModelMixin):
     """Модель для списка покупок."""
 
-    class Meta:
+    class Meta(UserRecipeModelMixin.Meta):
         """Класс Meta модели."""
-        ordering = ('user',)
+
         default_related_name = 'shopping_carts'
         verbose_name = 'Рецепт в списке покупок'
         verbose_name_plural = 'Рецепты в списке покупок'
@@ -174,10 +185,11 @@ class ShoppingCart(UserRecipeModelMixin):
 
 
 class Favourites(UserRecipeModelMixin):
+    """Модель для избранного."""
 
-    class Meta:
+    class Meta(UserRecipeModelMixin.Meta):
         """Класс Meta модели."""
-        ordering = ('user',)
+
         default_related_name = 'favourites'
         verbose_name = 'Рецепт в избранном'
         verbose_name_plural = 'Рецепты в избранном'

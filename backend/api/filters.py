@@ -17,6 +17,7 @@ class IngredientFilter(FilterSet):
 
     class Meta:
         """Класс Meta для фильтра."""
+
         model = Ingredient
         fields = ('name',)
 
@@ -37,6 +38,7 @@ class RecipesFilter(FilterSet):
 
     class Meta:
         """Класс Meta для фильтра."""
+
         model = Recipe
         fields = ('is_favorited', 'author', 'tags', 'is_in_shopping_cart')
 
@@ -47,7 +49,7 @@ class RecipesFilter(FilterSet):
         """
         if value:
             return queryset.filter(favourites__user=self.request.user.id)
-        return queryset.objects.all()
+        return queryset
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
         """Метод класса фильтра.
@@ -57,4 +59,4 @@ class RecipesFilter(FilterSet):
         if value:
             return queryset.filter(
                 shopping_carts__user=self.request.user.id)
-        return queryset.objects.all()
+        return queryset

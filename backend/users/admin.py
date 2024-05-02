@@ -16,10 +16,22 @@ class UserAdmin(UserAdmin):
         'first_name',
         'last_name',
         'email',
+        'user_recipes_count',
+        'followers_count',
     )
     list_filter = ('username', 'email',)
     search_fields = ('username', 'email',)
     ordering = ('username',)
+
+    @admin.display(description='Рецептов пользователя')
+    def user_recipes_count(self, obj):
+        """Метод класса для получения числа рецептов пользователя."""
+        return obj.recipes.count()
+
+    @admin.display(description='Подписано на пользователя')
+    def followers_count(self, obj):
+        """Метод класса для получения числа подписок на пользователя."""
+        return obj.follows.count()
 
 
 @admin.register(Follow)

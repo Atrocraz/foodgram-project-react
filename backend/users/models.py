@@ -27,8 +27,7 @@ class FoodgramUser(AbstractUser):
                    'менее. Допустимы буквы, цифры и @/./+/-/_.'),
         validators=(RegexValidator(
             regex=r'^[\w.@+-]+\Z',
-            message='Использованы запрещённые символы!'), check_me_name),
-        blank=False
+            message='Использованы запрещённые символы!'), check_me_name)
     )
     first_name = models.CharField('Имя',
                                   max_length=settings.FIRST_NAME_MAX_LEN,
@@ -39,6 +38,7 @@ class FoodgramUser(AbstractUser):
 
     class Meta:
         """Класс Meta модели."""
+
         ordering = ('username',)
         verbose_name = 'пользователь'
         verbose_name_plural = 'Пользователи'
@@ -67,6 +67,7 @@ class Follow(models.Model):
 
     class Meta:
         """Класс Meta модели."""
+
         ordering = ('user',)
         verbose_name = 'подписка'
         verbose_name_plural = 'Подписки'

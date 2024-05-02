@@ -9,7 +9,9 @@ User = get_user_model()
 
 
 class PostDeleteDBMixin:
-    """Миксин для обработки POST и DELETE запросов для моделей Follow,
+    """Миксин для обработки запросов.
+
+    Обрабатывает запросы POST и DELETE для моделей Follow,
     Favourites и ShoppingCart.
     """
 
