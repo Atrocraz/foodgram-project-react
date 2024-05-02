@@ -40,8 +40,8 @@ class FoodgramUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         """Возвращает True, если автор запроса подписан на пользователя obj."""
         request = self.context['request']
-        return (request is not None and request.user.is_authenticated and
-                obj.following.filter(user=request.user).exists())
+        return (request is not None and request.user.is_authenticated
+                and obj.following.filter(user=request.user).exists())
 
 
 class ReadFollowSerializer(FoodgramUserSerializer):
