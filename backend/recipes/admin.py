@@ -47,6 +47,14 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'author__username', 'favourites_count')
     list_filter = ('name', 'author', 'tags')
 
+    @staticmethod
+    def get_sorted_names(queryset):
+        """Метод класса для возврата списка имён из QuerySet."""
+        return [
+            item for item in queryset.values_list('name', flat=True).order_by(
+                'name')
+        ]
+
     @admin.display(description='Добавили в избранное')
     def favourites_count(self, obj):
         """Метод класса для получения числа подписок."""
@@ -55,16 +63,12 @@ class RecipeAdmin(admin.ModelAdmin):
     @admin.display(description='Ингредиенты')
     def display_ingredients(self, recipe):
         """Метод класса для получения ингредиентов."""
-        return recipe.ingredients.values_list(
-            'name', flat=True
-        ).order_by('name')
+        return self.get_sorted_names(recipe.ingredients)
 
     @admin.display(description='Теги')
     def display_tags(self, recipe):
         """Метод класса для получения тэгов."""
-        return recipe.tags.values_list(
-            'name', flat=True
-        ).order_by('name')
+        return self.get_sorted_names(recipe.tags)
 
 
 @admin.register(ShoppingCart)

@@ -14,11 +14,12 @@ class Command(BaseCommand):
     файла формата json.
     """
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.models = {
             'ingredients.json': Ingredient,
             'tags.json': Tag,
         }
+        super(Command, self).__init__(*args, **kwargs)
 
     def add_arguments(self, parser):
         parser.add_argument('json_file', type=str, nargs='?',
@@ -35,7 +36,8 @@ class Command(BaseCommand):
 
     def add_to_database(self, file_path):
         if not isfile(file_path):
-            print(f'Файл {file_path} не найден.')
+            self.stdout.write(
+                self.style.ERROR(f'Файл {file_path} не найден.'))
             return
 
         model = None
@@ -53,6 +55,10 @@ class Command(BaseCommand):
                 model(**data) for data in data_list
             ], ignore_conflicts=True)
         if model == Ingredient:
-            print('Объекты добавлены в базу данных для модели Ингредиент.')
+            self.stdout.write(
+                self.style.SUCCESS('Объекты добавлены в базу данных '
+                                   'для модели Ингредиент.'))
         elif model == Tag:
-            print('Объекты добавлены в базу данных для модели Тег.')
+            self.stdout.write(
+                self.style.SUCCESS('Объекты добавлены в базу данных '
+                                   'для модели Тэг.'))

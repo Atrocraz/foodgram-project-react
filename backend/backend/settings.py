@@ -50,8 +50,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'debug_toolbar',
     'djoser',
-    'recipes',
     'users',
+    'recipes',
     'api',
 ]
 

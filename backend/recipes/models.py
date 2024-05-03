@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from recipes.misc import get_rnd_hex_color
+from recipes.utils import get_rnd_hex_color
 
 User = get_user_model()
 

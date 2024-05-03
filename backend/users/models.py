@@ -25,16 +25,18 @@ class FoodgramUser(AbstractUser):
         max_length=settings.USERNAME_MAX_LEN,
         help_text=(f'Обязательное. {settings.USERNAME_MAX_LEN} знаков или '
                    'менее. Допустимы буквы, цифры и @/./+/-/_.'),
-        validators=(RegexValidator(
-            regex=r'^[\w.@+-]+\Z',
-            message='Использованы запрещённые символы!'), check_me_name)
+        validators=(
+            RegexValidator(
+                regex=r'^[\w.@+-]+\Z',
+                message='Использованы запрещённые символы!'
+            ),
+            check_me_name
+        )
     )
     first_name = models.CharField('Имя',
-                                  max_length=settings.FIRST_NAME_MAX_LEN,
-                                  blank=False)
+                                  max_length=settings.FIRST_NAME_MAX_LEN)
     last_name = models.CharField('Фамилия',
-                                 max_length=settings.SECOND_NAME_MAX_LEN,
-                                 blank=False)
+                                 max_length=settings.SECOND_NAME_MAX_LEN)
 
     class Meta:
         """Класс Meta модели."""
